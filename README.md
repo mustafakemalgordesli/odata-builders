@@ -18,6 +18,44 @@ Installation:
 npm install odata-builders
 ```
 
+and then use the library
+
+```js
+import {
+  ODataQueryBuilder,
+  FilterBuilder,
+  OrderDirection,
+} from "odata-builders";
+
+const filter = new FilterBuilder()
+  .contains("name", "Techno")
+  .and()
+  .lessThanOrEqual("price", 150)
+  .build();
+
+console.log(filter);
+//contains(name, 'Techno') and price le 150
+
+const categoryExpandBuilder = new ODataQueryBuilder("").select(["id", "name"]);
+
+const query = new ODataQueryBuilder("Products")
+  .filter(filter)
+  .orderBy("name", OrderDirection.DESC)
+  .select(["id", "name", "price"])
+  .expand("Category", categoryExpandBuilder)
+  .skip(10)
+  .top(5)
+  .build();
+
+console.log(query);
+//Products?$filter=contains(name, 'Techno') and price le 150&$orderby=name desc&$select=id,name,price&$expand=Category($select=id,name)&$skip=10&$top=5
+
+fetch(`http://localhost:5004/odata/${query}`)
+  .then((res) => res.json())
+  .then((res) => console.log(res))
+  .catch((err) => console.log(err));
+```
+
 ## LICENSE
 
 MIT License
